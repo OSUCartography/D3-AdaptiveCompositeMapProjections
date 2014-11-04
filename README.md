@@ -1,11 +1,9 @@
-Adaptive Composite Map Projections (in D3)
+Adaptive Composite Map Projections (D3 implementation)
 ==================================
-NOTE: Working progress
+<b>NOTE:</b> Working progress<br><br>
 
+<b>Goal</b><br>Trying to make adaptive composite map projections work right in D3.<br><br>
 
-Based on
-Canvas demo - http://bl.ocks.org/jczaplew/6798471
-GitHub - https://github.com/jczaplew/d3-acmp-lite
-
-Goal
-Trying to make adaptive composite map projections work right in D3.
+<b>Based on</b><br>
+  Canvas demo - http://bl.ocks.org/jczaplew/6798471<br>
+  GitHub - https://github.com/jczaplew/d3-acmp-lite<br>
