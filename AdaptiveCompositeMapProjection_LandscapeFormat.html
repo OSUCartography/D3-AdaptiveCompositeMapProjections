@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Adaptive Composite Map Projection (Landscape format)</title>
+  <style>
+    body {
+      background: #fcfcfa;
+      height: 400px;
+      position: relative;
+      width: 600px;
+    }
+    .stroke {
+      fill: none;
+      stroke: #000;
+      stroke-width: 3px;
+    }
+    .fill {
+      fill: #000;
+    }
+    .graticule {
+      fill: none;
+      stroke: #fff;
+      stroke-width: .5px;
+      stroke-opacity: .5;
+    }
+    .land {
+      fill: #fff;
+      stroke:#777;
+      stroke-width:.75px;
+    }
+    .boundary {
+      fill: none;
+      stroke: #fff;
+      stroke-width: .5px;
+    }
+  </style>
+</head>
+<body>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+  <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <script src="D3proj/transformedLambertAzimuthal.js"></script>
+  <script src="AdaptiveCompositeMapProjection.js"></script>
+   
+  <script>
+
+  var width = 600,
+      height = 400,
+      scale = 1,
+      m0,
+      o0,
+      currentProj,
+      rotate = [0.1,0.1],
+      projection = LandscapeMapACMP(1, [0,0]).translate([width / 2, height / 2]),
+      graticule = d3.geo.graticule(),
+      sphere = {type: "Sphere"};
+
+  var canvas = d3.select("body").append("canvas")
+    .attr("width", width)
+    .attr("height", height);
+
+  var context = canvas.node().getContext("2d");
+
+  var path = d3.geo.path()
+    .projection(projection)
+    .context(context);
+
+  var zoom = d3.behavior.zoom()
+    .center([width / 2, height / 2])
+    .on("zoomstart", function(){
+      m0 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
+        if (currentProj == "albers") {
+          var proj = projection.rotate(),
+              cent = projection.center();
+          o0 = [-proj[0], cent[1]];
+        } else {
+          var proj = projection.rotate();
+          o0 = [-proj[0],-proj[1]];
+        }
+        d3.event.sourceEvent.stopPropagation();
+    })
+    .on("zoom", function() {
+      if (m0) {
+        var constant = (scale < 4) ? 4 : scale * 2;
+        var m1 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY],
+            o1 = [o0[0] + (m0[0] - m1[0]) / constant, o0[1] + (m1[1] - m0[1]) / constant];
+      }
+
+      rotate = [-o1[0], -o1[1]];
+      scale = (d3.event.scale >= 1) ? d3.event.scale : 1;
+      projection = LandscapeMapACMP(scale, rotate).translate([width / 2, height / 2]);
+      path = d3.geo.path().projection(projection);
+      
+      context.clearRect(0, 0, width, height);
+      
+      // Update sphere styles
+      context.beginPath();
+      path.context(context)(sphere);
+      context.fillStyle = "#000";
+      context.fill();
+
+      // Update graticule styles
+      context.beginPath();
+      path.context(context)(grid);
+      context.lineWidth = 0.5;
+      context.strokeStyle = "#ddd";
+      context.stroke();
+
+      // Update land styles
+      context.beginPath();
+      path.context(context)(land);
+      context.fillStyle = "#fff";
+      context.fill();
+      context.strokeStyle = "#000";
+      context.stroke();
+
+    });
+
+  d3.json("countries_1e5.json", function(error, data) {
+    land = topojson.feature(data, data.objects.countries),
+    grid = graticule();
+
+    context.clearRect(0, 0, width, height);
+
+    // Style sphere
+    context.beginPath();
+    path(sphere);
+    context.fillStyle = "#000";
+    context.fill();
+
+    // Style graticule
+    context.beginPath();
+    path(grid);
+    context.lineWidth = 0.5;
+    context.strokeStyle = "#ddd";
+    context.stroke();
+
+    // Style land
+    context.beginPath();
+    path(land);
+    context.fillStyle = "#fff";
+    context.fill();
+    context.strokeStyle = "#000";
+    context.stroke();
+
+    canvas.call(zoom);
+
+    d3.select("body").append("text")
+      .attr("id", "info");
+    d3.select("body").append("text")
+      .attr("id", "proj");
+  });
+
+  </script>
+</body>
+</html>
