@@ -9,6 +9,7 @@ function transverseCylindricalEqualAreaRaw(lat0) {
 
 
 	forward.invert = function(x, y) {
+		/* Needs extra work*/
 		return projection.invert(-y, x);
 	};
 

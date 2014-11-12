@@ -2,7 +2,7 @@ function transformedLambertAzimuthalRaw(lonB, latB, ratio) {
 	var m, n, k, CA, CB, d,
 		lonLimit = lonB * Math.PI / 180,
 		latLimit = latB * Math.PI / 180,
-		LambertAzimuthalEqualArea = d3.geo.azimuthalEqualArea.raw;
+		lambertAzimuthalEqualArea = d3.geo.azimuthalEqualArea.raw;
 
 	if (Math.abs(lonLimit) > Math.PI)
 		lonLimit = Math.PI;
@@ -17,7 +17,7 @@ function transformedLambertAzimuthalRaw(lonB, latB, ratio) {
 	n = Math.abs(lonLimit / Math.PI);
 
 	if ((m === 1) && (n === 1)) {
-		return LambertAzimuthalEqualArea;
+		return lambertAzimuthalEqualArea;
 	}
 
 	k = Math.sqrt(ratio * Math.sin(latLimit / 2) / Math.sin(lonLimit / 2));
@@ -26,14 +26,14 @@ function transformedLambertAzimuthalRaw(lonB, latB, ratio) {
 	CB = 1 / (k * d);
 
 	function forward(λ, φ) {
-		var coordinates = LambertAzimuthalEqualArea(λ * n, Math.asin(m * Math.sin(φ)));
+		var coordinates = lambertAzimuthalEqualArea(λ * n, Math.asin(m * Math.sin(φ)));
 		coordinates[0] *= CA;
 		coordinates[1] *= CB;
 		return coordinates;
 	}
 
 	forward.invert = function(x, y) {
-		var coordinates = LambertAzimuthalEqualArea.invert(x / CA, y / CB);
+		var coordinates = lambertAzimuthalEqualArea.invert(x / CA, y / CB);
 		coordinates[0] /= n;
 		coordinates[1] = Math.asin(Math.sin(coordinates[1]) / m);
 		return coordinates;
